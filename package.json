@@ -1,5 +1,5 @@
 {
-  "name": "my-utils",
+  "name": "@highelflord/my-utils",
   "version": "1.2.0",
   "main": "index.js",
   "scripts": {
