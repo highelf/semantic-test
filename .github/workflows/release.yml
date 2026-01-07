@@ -16,6 +16,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Get GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          # By default, it uses the installation on $GITHUB_REPOSITORY.
+          # You can also specify an installation-id if needed.
+
       - uses: actions/setup-node@v6
         with:
           node-version: 24.x
@@ -31,8 +40,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Bump version and tag
+      - name: Use App token to merge PR Bump version and tag
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+#          GITHUB_APP_TOKEN: ${{ steps.app-token.outputs.token }}
+#          REPO: ${{ github.repository }}
+#          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           npm version patch -m "chore: release %s"
           git push --follow-tags
