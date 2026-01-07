@@ -30,11 +30,27 @@ jobs:
         run: |
           curl -s -H "Authorization: token $TOKEN" https://api.github.com/app
 
+      - name: Check repo access with app installation token
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          curl -s -H "Authorization: token $TOKEN" \
+            "https://api.github.com/repos/$REPO"
+
+      - name: Check installation repositories
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/installation/repositories"
+
       - name: Configure git auth for app token
         run: |
           git config user.name "my-ci-bypass-app[bot]"
           git config user.email "my-ci-bypass-app[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
+          echo "Configured git to use GitHub App token for authentication https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git"
 
       - uses: actions/setup-node@v4
         with:
