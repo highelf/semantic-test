@@ -24,6 +24,12 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
+      - name: Who am I
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          curl -s -H "Authorization: Bearer $TOKEN" https://api.github.com/user
+
       - name: Configure git auth for app token
         run: |
           git config user.name "my-ci-bypass-app[bot]"
