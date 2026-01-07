@@ -42,10 +42,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
       - name: Use App token to merge PR Bump version and tag
         run: |
-          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
+          # // git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
           npm version patch -m "chore: release %s"
           git push --follow-tags
-
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          
       - name: Publish to npm
         run: npm publish
         env:
