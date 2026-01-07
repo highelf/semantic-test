@@ -2,7 +2,7 @@ name: Release
 
 on:
   workflow_dispatch:
-  push: 
+  push:
     branches:
       - main
 
@@ -10,11 +10,12 @@ permissions:
   contents: write
   packages: write
 
-jobs: 
+jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Get GitHub App token
         id: app-token
@@ -22,10 +23,14 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          # By default, it uses the installation on $GITHUB_REPOSITORY.
-          # You can also specify an installation-id if needed.
 
-      - uses: actions/setup-node@v6
+      - name: Configure git auth for app token
+        run: |
+          git config user.name "my-ci-bypass-app[bot]"
+          git config user.email "my-ci-bypass-app[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 24.x
           registry-url: https://registry.npmjs.org
@@ -36,19 +41,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name:  Configure git
+      - name: Bump version and push tag
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Use App token to merge PR Bump version and tag
-        run: |
-          # // git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
           npm version patch -m "chore: release %s"
           git push --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          
+
       - name: Publish to npm
         run: npm publish
         env:
-          NODE_AUTH_TOKEN:  ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
