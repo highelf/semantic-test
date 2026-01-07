@@ -24,11 +24,11 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - name: Who am I
+      - name: Identify app for this token
         env:
           TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          curl -s -H "Authorization: Bearer $TOKEN" https://api.github.com/user
+          curl -s -H "Authorization: token $TOKEN" https://api.github.com/app
 
       - name: Configure git auth for app token
         run: |
